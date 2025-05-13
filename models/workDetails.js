@@ -1,5 +1,5 @@
 module.exports = (sequelize, Sequelize) => {
-  const Work = sequelize.define('Work', {
+  const WorkDetails = sequelize.define('WorkDetails', {
     companyname: Sequelize.DataTypes.STRING,
     salary: Sequelize.DataTypes.DECIMAL(10, 2),
     currency: Sequelize.DataTypes.STRING(3),
@@ -7,11 +7,11 @@ module.exports = (sequelize, Sequelize) => {
     timestamps: false
   });
 
-  Work.associate = (models) => {
-    Work.belongsTo(models.Participant, {
+  WorkDetails.associate = (models) => {
+    WorkDetails.belongsTo(models.Participant, {
       foreignKey: 'participantId'
     });
   };
 
-  return Work;
+  return WorkDetails;
 }

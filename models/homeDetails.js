@@ -1,16 +1,16 @@
 module.exports = (sequelize, Sequelize) => {
-  const Home = sequelize.define('Home', {
+  const HomeDetails = sequelize.define('HomeDetails', {
     country: Sequelize.DataTypes.STRING,
     city: Sequelize.DataTypes.STRING
   }, {
     timestamps: false
   });
 
-  Home.associate = (models) => {
-    Home.belongsTo(models.Participant, {
+  HomeDetails.associate = (models) => {
+    HomeDetails.belongsTo(models.Participant, {
       foreignKey: 'participantId'
     });
   };
 
-  return Home;
+  return HomeDetails;
 }

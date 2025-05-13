@@ -4,12 +4,18 @@ class ParticipantService {
   constructor(db) {
     // Initialize any properties or dependencies here
     this.db = db.sequelize;
+    this.Participant = db.Participant;
+    this.WorkDetail  = db.WorkDetail;
+    this.HomeDetail  = db.HomeDetail;
   }
 
   // Example method to fetch participant data
   async getParticipantById(id) {
-    // Implement logic to fetch participant by ID
-    throw new Error("Method not implemented.");
+    const participant = await this.Participant.findByPk(id);
+    if (!participant) {
+      throw new Error("Participant not found.");
+    }
+    return participant;
   }
 
   // Example method to add a new participant
