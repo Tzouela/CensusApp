@@ -1,16 +1,14 @@
-module.exports = (sequelize, Sequelize) => {
+module.exports = (sequelize, DataTypes) => {
   const HomeDetails = sequelize.define('HomeDetails', {
-    country: Sequelize.DataTypes.STRING,
-    city: Sequelize.DataTypes.STRING
-  }, {
-    timestamps: false
-  });
+    email:   { type: DataTypes.STRING, allowNull: false },
+    country: { type: DataTypes.STRING, allowNull: false },
+    city:    { type: DataTypes.STRING, allowNull: false }
+  }, { timestamps: false });
 
   HomeDetails.associate = (models) => {
-    HomeDetails.belongsTo(models.Participant, {
-      foreignKey: 'participantId'
-    });
+    HomeDetails.belongsTo(models.Participant, { as: 'participant', foreignKey: 'email', targetKey: 'email', onDelete: 'CASCADE',
+      onUpdate: 'CASCADE' });
   };
 
   return HomeDetails;
-}
+};

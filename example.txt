@@ -1,0 +1,34 @@
+{
+  "participant": {
+    "email": "jane.doe@example.com",
+    "firstname": "Janet",
+    "lastname": "Doe",
+    "dob": "1990-05-14"
+  },
+  "work": {
+    "companyname": "Initech",
+    "salary": 85000,
+    "currency": "USD"
+  },
+  "home": {
+    "country": "USA",
+    "city": "Springfield"
+  }
+}
+
+
+
+// middleware/auth.js
+module.exports.ensureLoggedIn = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+  next();
+};
+
+module.exports.ensureAdmin = (req, res, next) => {
+  if (!req.user.isAdmin) {
+    return res.status(403).json({ error: 'Admin privileges required' });
+  }
+  next();
+};

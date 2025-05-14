@@ -1,40 +1,78 @@
-const { sequelize } = require("../models");
-const { QueryTypes } = require('sequelize');
+const db = require("../models");
+
 class ParticipantService {
-  constructor(db) {
-    // Initialize any properties or dependencies here
-    this.db = db.sequelize;
+  constructor() {
     this.Participant = db.Participant;
-    this.WorkDetail  = db.WorkDetail;
-    this.HomeDetail  = db.HomeDetail;
+    this.WorkDetails  = db.WorkDetails;
+    this.HomeDetails  = db.HomeDetails;
+    this.sequelize    = db.sequelize;
   }
 
-  // Example method to fetch participant data
-  async getParticipantById(id) {
-    const participant = await this.Participant.findByPk(id);
-    if (!participant) {
-      throw new Error("Participant not found.");
-    }
-    return participant;
+  async addParticipant({ participant, work, home }) {
+    const created = await this.Participant.create(
+      { ...participant, work, home },
+      {
+        include: ['work','home']
+      }
+    );
+    return created;
   }
 
-  // Example method to add a new participant
-  async addParticipant(participantData) {
-    // Implement logic to add a new participant
-    throw new Error("Method not implemented.");
+  async listParticipants() {
+    return this.Participant.findAll({ include: ['work','home'] });
   }
 
-  // Example method to update participant data
-  async updateParticipant(id, updatedData) {
-    // Implement logic to update participant data
-    throw new Error("Method not implemented.");
-  }
-
-  // Example method to delete a participant
-  async deleteParticipant(id) {
-    // Implement logic to delete a participant
-    throw new Error("Method not implemented.");
-  }
+async detailsAll() {
+  return this.Participant.findAll({
+    attributes: ['firstname','lastname','email']
+  });
 }
+
+async detailsByEmail(email) {
+  const p = await this.Participant.findByPk(email, {
+    attributes: ['firstname','lastname','dob','email']
+  });
+  if (!p) throw { status: 404, message: 'Participant not found' };
+  return p;
+}
+
+async workByEmail(email) {
+  const w = await this.WorkDetails.findOne({
+    where: { email },
+    attributes: ['companyname','salary','currency']
+  });
+  if (!w) throw { status: 404, message: 'Work details not found' };
+  return w;
+}
+
+async homeByEmail(email) {
+  const h = await this.HomeDetails.findOne({
+    where: { email },
+    attributes: ['country','city']
+  });
+  if (!h) throw { status: 404, message: 'Home details not found' };
+  return h;
+}
+
+async updateParticipant(email, { participant, work, home }) {
+  return this.sequelize.transaction(async (t) => {
+    const p = await this.Participant.findByPk(email, { transaction: t });
+    if (!p) throw { status: 404, message: 'Participant not found' };
+    await p.update(participant,      { transaction: t });
+    await this.WorkDetails.update(work,   { where: { email }, transaction: t });
+    await this.HomeDetails.update(home,   { where: { email }, transaction: t });
+    return this.Participant.findByPk(email, {
+      include: ['work','home'],
+      transaction: t
+    });
+  });
+}
+
+async deleteParticipant(email) {
+  const count = await this.Participant.destroy({ where: { email } });
+  if (!count) throw { status: 404, message: 'Participant not found' };
+}
+}
+
 
 module.exports = ParticipantService;
