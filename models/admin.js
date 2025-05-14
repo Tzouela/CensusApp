@@ -1,15 +1,20 @@
-module.exports = (sequelize, Sequelize) => {
-  const Admin = sequelize.define('Admin', {
-    username: {
-      type: Sequelize.DataTypes.STRING,
-      unique: true
+module.exports = (sequelize, DataTypes) => {
+  const Admin = sequelize.define(
+    'Admin',
+    {
+      username: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true
+      },
+      password: {
+        type: DataTypes.STRING,
+        allowNull: false
+      }
     },
-    password: {
-      type: Sequelize.DataTypes.STRING
+    {
+      timestamps: false
     }
-  }, {
-    timestamps: false
-  });
-
+  );
   return Admin;
 };
