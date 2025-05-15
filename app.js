@@ -13,22 +13,29 @@ var db = require("./models");
 
 var app = express();
 
-(async function(){
-  await db.sequelize.sync({ force: false });
+async function seedAdmin() {
   const { LOGIN_USER, LOGIN_PASSWORD } = process.env;
-  if (LOGIN_USER && LOGIN_PASSWORD) {
-    const exists = await db.Admin.findOne({ where: { username: LOGIN_USER } });
-    if (!exists) {
-      await db.Admin.create({
-        username: LOGIN_USER,
-        password: LOGIN_PASSWORD
-      });
-      console.log(`Seeded Admin/${LOGIN_USER}`);
-    }
-  } else {
+  if (!LOGIN_USER || !LOGIN_PASSWORD) {
     console.warn('LOGIN_USER or LOGIN_PASSWORD not set');
+    return;
   }
-})();
+
+  await db.sequelize.sync({ force: false });
+
+  const [admin, created] = await db.Admin.findOrCreate({
+    where: { username: LOGIN_USER },
+    defaults: { password: LOGIN_PASSWORD }
+  });
+
+  if (created) {
+    console.log(`Seeded Admin/${LOGIN_USER}`);
+  }
+}
+
+seedAdmin().catch(err => {
+  console.error('Failed to seed admin:', err);
+  process.exit(1);
+});
 
 
 // view engine setup
@@ -46,12 +53,13 @@ app.use('/users', usersRouter);
 app.use('/participants', participantsRouter);
 
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   next(createError(404));
 });
 
 app.use((err, req, res, next) => {
-  if (req.accepts('json') || req.path.startsWith('/participants')) {
+  if (req.accepts('json') ||
+    req.path.startsWith('/participants')) {
     return res
       .status(err.status || 500)
       .json({
@@ -60,6 +68,6 @@ app.use((err, req, res, next) => {
       });
   }
   next(err);
-}); 
+});
 
 module.exports = app;
